@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lamumudotxyz - Cow Coin Collector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #000000, #333333, #666666, #ffffff);
+            background-size: 400% 400%;
+            animation: gradientShift 6s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .game-container {
+            width: 1100px;
+            height: 800px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: 5px solid rgba(255, 140, 0, 0.8);
+            backdrop-filter: blur(20px);
+        }
+
+        .game-header {
+            background: linear-gradient(90deg, #000000, #333333, #FF8C00, #000000);
+            background-size: 300% 100%;
+            animation: headerGradient 4s ease infinite;
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes headerGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .game-title {
+            display: flex;
+            align-items: center;
+            height: 50px;
+        }
+
+        .game-title img {
+            height: 45px;
+            width: auto;
+            max-width: 200px;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 4px rgba(255, 140, 0, 0.5));
+        }
+
+        .scores {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .score, .best-score {
+            font-size: 20px;
+            font-weight: bold;
+            background: rgba(255, 140, 0, 0.25);
+            padding: 12px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 140, 0, 0.5);
+        }
+
+        .best-score {
+            background: rgba(255, 140, 0, 0.4);
+            border: 2px solid rgba(255, 140, 0, 0.8);
+        }
+
+        .game-area {
+            width: 100%;
+            height: 680px;
+            position: relative;
+            background: linear-gradient(to bottom, 
+                rgba(255, 255, 255, 0.9), 
+                rgba(240, 240, 240, 0.8), 
+                rgba(220, 220, 220, 0.7), 
+                rgba(200, 200, 200, 0.6));
+            overflow: hidden;
+        }
+
+        .cow {
+            width: 120px;
+            height: 120px;
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: left 0.08s ease;
+            z-index: 10;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(255, 140, 0, 0.5);
+            border: 4px solid rgba(255, 140, 0, 0.8);
+        }
+
+        .cow img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .coin {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #FF8C00, #FFD700, #FF4500);
+            border-radius: 50%;
+            position: absolute;
+            border: 4px solid #000000;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.7);
+            animation: spin 1.5s linear infinite, coinGlow 2s ease-in-out infinite;
+        }
+
+        .coin::before {
+            content: '₿';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #000000;
+            font-weight: bold;
+            font-size: 20px;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes spin {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        @keyframes coinGlow {
+            0%, 100% { box-shadow: 0 4px 15px rgba(255, 140, 0, 0.7); }
+            50% { box-shadow: 0 4px 25px rgba(255, 140, 0, 0.9); }
+        }
+
+        .start-screen, .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.98);
+            padding: 50px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 4px solid rgba(255, 140, 0, 0.8);
+            z-index: 100;
+            max-width: 600px;
+        }
+
+        .start-screen h2, .game-over h2 {
+            background: linear-gradient(45deg, #000000, #FF8C00, #333333);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 38px;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .instructions {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 30px;
+            line-height: 1.7;
+        }
+
+        .final-score {
+            font-size: 32px;
+            background: linear-gradient(45deg, #000000, #FF8C00);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .best-indicator {
+            color: #FF8C00;
+            font-size: 18px;
+            margin-top: 10px;
+            font-weight: bold;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .start-btn, .restart-btn {
+            background: linear-gradient(45deg, #000000, #FF8C00, #333333);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 35px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 25px rgba(255, 140, 0, 0.5);
+            margin: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .start-btn:hover, .restart-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 35px rgba(255, 140, 0, 0.6);
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: linear-gradient(45deg, #FF8C00, #000000, #ffffff);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle-float 1.5s ease-out forwards;
+        }
+
+        @keyframes particle-float {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--dx), var(--dy)) scale(0);
+            }
+        }
+
+        .lives {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            font-size: 28px;
+            color: #FF8C00;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 140, 0, 0.5);
+        }
+
+        .game-info {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            color: #333;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 140, 0, 0.5);
+            font-weight: bold;
+        }
+
+        .controls-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #333;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            border: 2px solid rgba(255, 140, 0, 0.6);
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+        }
+
+        .footer a {
+            color: #FF8C00;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.8);
+        }
+
+        .speed-indicator {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #333;
+            border: 2px solid rgba(255, 140, 0, 0.6);
+        }
+
+        .character-upload {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 15px;
+            border: 2px dashed rgba(255, 140, 0, 0.6);
+        }
+
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #FF8C00, #000000);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+        }
+
+        .preview-container {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .character-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #FF8C00;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+        }
+
+        .reset-character {
+            margin-top: 10px;
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-character:hover {
+            background: #FF8C00;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="game-title"><img src="ICM-removebg-preview.png" alt=""></div>
+            <div class="scores">
+                <div class="score">Score: <span id="score">0</span></div>
+                <div class="best-score">Best: <span id="bestScore">0</span></div>
+            </div>
+        </div>
+        
+        <div class="game-area" id="gameArea">
+            <div class="lives" id="lives">🧡 Lives: 3</div>
+            <div class="game-info">Catch all coins!</div>
+            <div class="speed-indicator" id="speedIndicator">Speed: 1x</div>
+            
+            <!-- Cow character with image -->
+            <div class="cow" id="cow">
+                <img src="ICM-removebg-preview.png" alt="Character" id="characterImg"/>
+            </div>
+            
+            <div class="controls-hint">Use ← → arrow keys to move fast!</div>
+        </div>
+        
+        <!-- Start Screen -->
+        <div class="start-screen" id="startScreen">
+            <h2>Welcome to ICM.RUN ! </h2>
+            <div class="instructions">
+                Move your character left and right to catch falling coins!<br>
+                <strong>Warning:</strong> If any coin hits the ground, you lose a life!<br>
+                Game gets faster as you progress!<br><br>
+                Use <strong>Arrow Keys</strong> for super-fast movement!
+            </div>
+            
+            <div class="character-upload">
+                <h3 style="color: #333; margin-bottom: 15px;">🎨 Customize Your Character</h3>
+                <div class="upload-area">
+                    <input type="file" id="characterUpload" class="file-input" accept="image/*">
+                    <button class="upload-btn" onclick="document.getElementById('characterUpload').click()">
+                        📁 Upload Your Image
+                    </button>
+                    <div class="preview-container" id="previewContainer">
+                        <img id="characterPreview" class="character-preview" alt="Character Preview">
+                        <button class="reset-character" onclick="resetCharacter()">
+                            🔄 Reset to Default
+                        </button>
+                    </div>
+                    <p style="font-size: 14px; color: #666;">Upload any image to use as your character!</p>
+                </div>
+            </div>
+            
+            <button class="start-btn" onclick="startGame()">Start Game</button>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div class="game-over" id="gameOver" style="display: none;">
+            <h2>Game Over! 🐄</h2>
+            <div class="final-score" id="finalScore">Final Score: 0</div>
+            <div class="best-indicator" id="newBestIndicator" style="display: none;">🎉 NEW BEST SCORE! 🎉</div>
+            
+            <div class="character-upload" style="margin: 30px 0;">
+                <h3 style="color: #333; margin-bottom: 15px;">🎨 Change Character</h3>
+                <div class="upload-area">
+                    <button class="upload-btn" onclick="document.getElementById('characterUpload').click()">
+                        📁 Upload New Image
+                    </button>
+                    <div class="preview-container" id="previewContainer2" style="display: none;">
+                        <button class="reset-character" onclick="resetCharacter()">
+                            🔄 Reset to Default
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="restart-btn" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+    
+    <div class="footer">
+        Powered by <strong>Clankak</strong> • Follow us: <a href="https://x.com/Clankak" target="_blank">@Clankak</a>
+    </div>
+
+    <script>
+        const cow = document.getElementById('cow');
+        const gameArea = document.getElementById('gameArea');
+        const scoreElement = document.getElementById('score');
+        const bestScoreElement = document.getElementById('bestScore');
+        const livesElement = document.getElementById('lives');
+        const speedIndicator = document.getElementById('speedIndicator');
+        const gameOverElement = document.getElementById('gameOver');
+        const startScreenElement = document.getElementById('startScreen');
+        const finalScoreElement = document.getElementById('finalScore');
+        const newBestIndicator = document.getElementById('newBestIndicator');
+        const characterImg = document.getElementById('characterImg');
+        const characterUpload = document.getElementById('characterUpload');
+        const characterPreview = document.getElementById('characterPreview');
+        const previewContainer = document.getElementById('previewContainer');
+        
+        let cowPosition = 50; // percentage
+        let score = 0;
+        let lives = 3;
+        let gameRunning = false;
+        let gameStarted = false;
+        let coins = [];
+        let coinSpawnInterval;
+        let gameLoopInterval;
+        let bestScore = getCookie('bestScore') || 0;
+        let gameSpeed = 1200; // Starting spawn rate
+        let fallSpeed = 3; // Starting fall speed
+        let currentSpeedMultiplier = 1;
+        let customCharacterImage = localStorage.getItem('customCharacterImage');
+        
+        // Initialize best score display
+        bestScoreElement.textContent = bestScore;
+        
+        // Load custom character if exists
+        if (customCharacterImage) {
+            characterImg.src = customCharacterImage;
+            characterPreview.src = customCharacterImage;
+            previewContainer.style.display = 'block';
+        }
+        
+        // Character upload handling
+        characterUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const imageUrl = event.target.result;
+                    characterImg.src = imageUrl;
+                    characterPreview.src = imageUrl;
+                    previewContainer.style.display = 'block';
+                    
+                    // Save to localStorage
+                    localStorage.setItem('customCharacterImage', imageUrl);
+                    customCharacterImage = imageUrl;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Reset character to default
+        function resetCharacter() {
+            const defaultCharacter = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23FF8C00'/%3E%3Ctext x='50' y='60' font-size='40' text-anchor='middle' fill='white'%3E🎮%3C/text%3E%3C/svg%3E";
+            characterImg.src = defaultCharacter;
+            previewContainer.style.display = 'none';
+            localStorage.removeItem('customCharacterImage');
+            customCharacterImage = null;
+        }
+        
+        // Cookie functions
+        function setCookie(name, value, days = 365) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+        }
+        
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return parseInt(c.substring(nameEQ.length, c.length));
+            }
+            return null;
+        }
+        
+        // Control cow movement - MUCH FASTER
+        function moveCow(direction) {
+            if (!gameRunning) return;
+            
+            if (direction === 'left' && cowPosition > 5) {
+                cowPosition -= 15; // Much faster movement
+            } else if (direction === 'right' && cowPosition < 95) {
+                cowPosition += 15; // Much faster movement
+            }
+            cow.style.left = cowPosition + '%';
+        }
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                moveCow('left');
+            }
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                moveCow('right');
+            }
+        });
+        
+        // Update game speed
+        function updateGameSpeed() {
+            const speedIncrease = Math.floor(score / 50);
+            currentSpeedMultiplier = 1 + (speedIncrease * 0.3);
+            const newFallSpeed = fallSpeed * currentSpeedMultiplier;
+            const newSpawnRate = Math.max(600, gameSpeed - (speedIncrease * 100));
+            
+            speedIndicator.textContent = `Speed: ${currentSpeedMultiplier.toFixed(1)}x`;
+            
+            // Update coin spawn rate
+            if (coinSpawnInterval) {
+                clearInterval(coinSpawnInterval);
+                coinSpawnInterval = setInterval(createCoin, newSpawnRate);
+            }
+        }
+        
+        // Create coin
+        function createCoin() {
+            if (!gameRunning) return;
+            
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            const randomPosition = Math.random() * 85 + 7.5;
+            coin.style.left = randomPosition + '%';
+            coin.style.top = '-50px';
+            
+            let coinTop = -50;
+            const currentFallSpeed = fallSpeed * currentSpeedMultiplier;
+            
+            const fallInterval = setInterval(() => {
+                if (!gameRunning) {
+                    clearInterval(fallInterval);
+                    return;
+                }
+                
+                coinTop += currentFallSpeed;
+                coin.style.top = coinTop + 'px';
+                
+                if (coinTop > 640) {
+                    loseLife();
+                    clearInterval(fallInterval);
+                    if (coin.parentNode) {
+                        coin.parentNode.removeChild(coin);
+                    }
+                    coins = coins.filter(c => c.element !== coin);
+                }
+            }, 16);
+            
+            gameArea.appendChild(coin);
+            coins.push({element: coin, interval: fallInterval});
+        }
+        
+        // Lose a life
+        function loseLife() {
+            lives--;
+            livesElement.textContent = `🧡 Lives: ${lives}`;
+            
+            if (lives <= 0) {
+                endGame();
+            }
+        }
+        
+        // Check collisions
+        function checkCollisions() {
+            const cowRect = cow.getBoundingClientRect();
+            
+            coins.forEach((coinObj, index) => {
+                const coin = coinObj.element;
+                const coinRect = coin.getBoundingClientRect();
+                
+                if (cowRect.left < coinRect.right &&
+                    cowRect.right > coinRect.left &&
+                    cowRect.top < coinRect.bottom &&
+                    cowRect.bottom > coinRect.top) {
+                    
+                    score += 10;
+                    scoreElement.textContent = score;
+                    
+                    // Update speed every 50 points
+                    if (score % 50 === 0) {
+                        updateGameSpeed();
+                    }
+                    
+                    createParticles(coinRect.left + coinRect.width/2, coinRect.top + coinRect.height/2);
+                    
+                    clearInterval(coinObj.interval);
+                    coin.parentNode.removeChild(coin);
+                    coins.splice(index, 1);
+                }
+            });
+        }
+        
+        // Create particle effect
+        function createParticles(x, y) {
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                const dx = (Math.random() - 0.5) * 100;
+                const dy = (Math.random() - 0.5) * 100;
+                particle.style.setProperty('--dx', dx + 'px');
+                particle.style.setProperty('--dy', dy + 'px');
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 1500);
+            }
+        }
+        
+        // Game loop
+        function gameLoop() {
+            if (gameRunning) {
+                checkCollisions();
+            }
+        }
+        
+        // Start game
+        function startGame() {
+            gameStarted = true;
+            gameRunning = true;
+            score = 0;
+            lives = 3;
+            cowPosition = 50;
+            gameSpeed = 1200;
+            fallSpeed = 3;
+            currentSpeedMultiplier = 1;
+            
+            scoreElement.textContent = '0';
+            livesElement.textContent = '🧡 Lives: 3';
+            speedIndicator.textContent = 'Speed: 1.0x';
+            cow.style.left = '50%';
+            startScreenElement.style.display = 'none';
+            gameOverElement.style.display = 'none';
+            
+            // Clear existing coins
+            coins.forEach(coinObj => {
+                clearInterval(coinObj.interval);
+                if (coinObj.element.parentNode) {
+                    coinObj.element.parentNode.removeChild(coinObj.element);
+                }
+            });
+            coins = [];
+            
+            // Start game loops
+            gameLoopInterval = setInterval(gameLoop, 16);
+            coinSpawnInterval = setInterval(createCoin, gameSpeed);
+        }
+        
+        // End game
+        function endGame() {
+            gameRunning = false;
+            clearInterval(gameLoopInterval);
+            clearInterval(coinSpawnInterval);
+            
+            coins.forEach(coinObj => {
+                clearInterval(coinObj.interval);
+                if (coinObj.element.parentNode) {
+                    coinObj.element.parentNode.removeChild(coinObj.element);
+                }
+            });
+            coins = [];
+            
+            let isNewBest = false;
+            if (score > bestScore) {
+                bestScore = score;
+                bestScoreElement.textContent = bestScore;
+                setCookie('bestScore', bestScore);
+                isNewBest = true;
+            }
+            
+            finalScoreElement.textContent = `Final Score: ${score}`;
+            newBestIndicator.style.display = isNewBest ? 'block' : 'none';
+            gameOverElement.style.display = 'block';
+        }
+        
+        // Restart game
+        function restartGame() {
+            startGame();
+        }
+    </script>
+</body>
+</html>
